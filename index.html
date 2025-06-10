@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriLease - शेतकरी मार्केटप्लेस</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-grow: 0.5;
+            margin: 0 20px;
+        }
+
+        .search-bar input {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            width: 100%;
+        }
+
+        .search-bar button {
+            padding: 8px 15px;
+            border: none;
+            background-color: #388E3C;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .cart-icon {
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cart-count {
+            background-color: #FF5722;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .user-icon {
+            cursor: pointer;
+            margin-left: 15px;
+            position: relative;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .user-icon:hover .user-dropdown {
+            display: block;
+        }
+
+        .user-dropdown a {
+            color: #333;
+            display: block;
+            padding: 8px 15px;
+            text-decoration: none;
+        }
+
+        .user-dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .logout-btn {
+            background-color: transparent;
+            border: none;
+            color: #D32F2F;
+            width: 100%;
+            text-align: left;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .logout-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #388E3C;
+        }
+
+        .secondary-btn {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .secondary-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Quick Categories */
+        .quick-categories {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .category-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .category-card h3 {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Product Section */
+        .product-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            color: #2E7D32;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-card h3 {
+            margin: 15px 15px 5px;
+            font-size: 1.2rem;
+        }
+
+        .product-card p {
+            margin: 0 15px 10px;
+            color: #666;
+        }
+
+        .price {
+            margin: 0 15px 15px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .quick-view {
+            display: block;
+            width: calc(100% - 30px);
+            margin: 0 15px 15px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .quick-view:hover {
+            background-color: #388E3C;
+        }
+
+        /* Filters */
+        .land-size-filter,
+        .machine-type-filter {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 15px;
+            border: 1px solid #4CAF50;
+            background-color: white;
+            color: #4CAF50;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            background-color: #E8F5E9;
+        }
+
+        /* Buttons */
+        .location-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: calc(100% - 30px);
+            justify-content: center;
+        }
+
+        .location-btn i {
+            font-size: 0.9rem;
+        }
+
+        .location-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .weather-btn {
+            background-color: #00BCD4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .weather-btn:hover {
+            background-color: #0097a7;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Booking Form */
+        .booking-form {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .booking-form h3 {
+            margin-top: 0;
+            color: #2E7D32;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        /* Map Modal */
+        .map-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .map-modal.show {
+            display: flex;
+        }
+
+        .map-modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 5px;
+            z-index: 100;
+        }
+
+        .map-close-btn:hover {
+            color: #333;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .map-controls button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .map-controls button:hover {
+            background-color: #388E3C;
+        }
+
+        #farmland-map {
+            flex: 1;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #2E7D32;
+            color: white;
+            padding: 50px 0 0;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            gap: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .footer-section p,
+        .footer-section li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #d1ffd7;
+        }
+
+        .footer-section i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            background-color: #1B5E20;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+
+            .quick-categories,
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                width: 100%;
+                margin: 15px 0;
+                order: 3;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 15px;
+                order: 2;
+                width: 100%;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 576px) {
+
+            .quick-categories,
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links a {
+                margin: 5px;
+                font-size: 0.9rem;
+            }
+
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-body img {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <!-- Map Modal -->
+    <div class="map-modal" id="mapModal">
+        <div class="map-modal-content">
+            <button class="map-close-btn" id="closeMapModal">&times;</button>
+            <div class="map-controls">
+                <button id="locate-me">Show My Location</button>
+                <button id="add-farm">Add Farmland</button>
+            </div>
+            <div id="farmland-map"></div>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function AgriLeaseApp() {
+            const [cartCount, setCartCount] = useState(0);
+            const [showModal, setShowModal] = useState(false);
+            const [modalContent, setModalContent] = useState(null);
+            const [showBookingForm, setShowBookingForm] = useState(false);
+            const [bookingDetails, setBookingDetails] = useState({
+                name: '',
+                contact: '',
+                date: '',
+                duration: '',
+                message: ''
+            });
+            const [searchQuery, setSearchQuery] = useState("");
+            const [activeSection, setActiveSection] = useState("home");
+            const [landSizeFilter, setLandSizeFilter] = useState("all");
+            const [machineTypeFilter, setMachineTypeFilter] = useState("all");
+            const [mapInitialized, setMapInitialized] = useState(false);
+
+            const products = {
+                land1: {
+                    id: 'land1',
+                    type: 'land',
+                    size: '3-5',
+                    title: "५ एकर सेंद्रिय शेती",
+                    location: "चेन्नई, तमिळनाडू",
+                    coordinates: [13.0827, 80.2707],
+                    price: "₹१५,०००/महिना",
+                    description: "ही जमीन सेंद्रिय शेतीसाठी उत्तम आहे. पाण्याची सोय, विजेची सोय आणि रस्त्याची जवळीक आहे. मातीची गुणवत्ता उत्तम आणि पूर्वी सेंद्रिय पिके घेतली आहेत.",
+                    image: "5acre.jpg"
+                },
+                land2: {
+                    id: 'land2',
+                    type: 'land',
+                    size: '5-10',
+                    title: "८ एकर सुपीक जमीन",
+                    location: "पंजाब",
+                    coordinates: [31.1471, 75.3412],
+                    price: "₹२२,०००/महिना",
+                    description: "पंजाबमधील ही जमीन गहू आणि तांदूळ पिकांसाठी उत्तम आहे. सुपीक माती आणि पूर्ण सिंचन सुविधा उपलब्ध. २ वर्षांच्या करारासाठी उपलब्ध.",
+                    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                },
+                land3: {
+                    id: 'land3',
+                    type: 'land',
+                    size: '3-5',
+                    title: "३ एकर सिंचनासह",
+                    location: "महाराष्ट्र",
+                    coordinates: [19.7515, 75.7139],
+                    price: "₹१२,०००/महिना",
+                    description: "महाराष्ट्रातील ही जमीन बागायती पिकांसाठी योग्य आहे. बोरवेल आणि ड्रिप सिंचन सुविधा उपलब्ध. जवळच बाजारपेठ आणि रस्त्याची सोय.",
+                    image: "3acre.jpg"
+                },
+                land4: {
+                    id: 'land4',
+                    type: 'land',
+                    size: '10-20',
+                    title: "१५ एकर फळबाग",
+                    location: "महाराष्ट्र",
+                    coordinates: [18.5204, 73.8567],
+                    price: "₹३५,०००/महिना",
+                    description: "महाराष्ट्रातील ही जमीन फळबागेसाठी आदर्श आहे. आंबा, ड्रॅगन फ्रूट, केळी यासारखी पिके घेण्यासाठी योग्य. ड्रिप सिंचन सुविधा उपलब्ध.",
+                    image: "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                },
+                land5: {
+                    id: 'land5',
+                    type: 'land',
+                    size: '20+',
+                    title: "२५ एकर मोठी शेती",
+                    location: "राजस्थान",
+                    coordinates: [26.9124, 75.7873],
+                    price: "₹६०,०००/महिना",
+                    description: "राजस्थानमधील ही मोठी शेती ज्वारी, बाजरी यासारख्या पिकांसाठी योग्य आहे. मोठ्या प्रमाणावर शेती करण्यासाठी उत्तम. सिंचन सुविधा उपलब्ध.",
+                    image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                },
+                machine1: {
+                    id: 'machine1',
+                    type: 'machine',
+                    category: 'tractor',
+                    title: "John Deere ट्रॅक्टर",
+                    specs: "५० एचपी, २०२० मॉडेल",
+                    rentPrice: "₹१,५००/दिवस (भाडे)",
+                    purchasePrice: "₹५,५०,००० (खरेदी)",
+                    description: "नवीन अवस्थेत असलेला John Deere ट्रॅक्टर. सर्व सुविधांसह, डिझेल इंजिन, 4WD. ऑपरेटरासह किंवा ऑपरेटरशिवाय भाड्याने दिला जातो.",
+                    image: "tractor2.jpg"
+                },
+                machine2: {
+                    id: 'machine2',
+                    type: 'machine',
+                    category: 'harvester',
+                    title: "कॉम्बाईन हार्वेस्टर",
+                    specs: "२०२१ मॉडेल",
+                    rentPrice: "₹३,०००/दिवस (भाडे)",
+                    purchasePrice: "₹१२,००,००० (खरेदी)",
+                    description: "अलीकडेच आयात केलेला कॉम्बाईन हार्वेस्टर. गहू, तांदूळ, सोयाबीन यांसारख्या पिकांची कापणी करण्यासाठी उत्तम. दिवसा किंवा आठवड्याच्या हप्त्यावर भाड्याने उपलब्ध.",
+                    image: "combine_harverstor.jpg"
+                },
+                machine3: {
+                    id: 'machine3',
+                    type: 'machine',
+                    category: 'irrigation',
+                    title: "सौर सिंचन पंप",
+                    specs: "५ एचपी क्षमतेचा",
+                    rentPrice: "₹५००/दिवस (भाडे)",
+                    purchasePrice: "₹४५,००० (खरेदी)",
+                    description: "सौर ऊर्जेवर चालणारा सिंचन पंप. डिझेल/वीज खर्च वाचवा. 5 HP क्षमता, 100-200 फूट खोलीपर्यंत पाणी काढू शकतो. सर्व्हिसिंगसह उपलब्ध.",
+                    image: "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                },
+                machine4: {
+                    id: 'machine4',
+                    type: 'machine',
+                    category: 'tractor',
+                    title: "Mahindra ट्रॅक्टर",
+                    specs: "४० एचपी, २०२२ मॉडेल",
+                    rentPrice: "₹१,२००/दिवस (भाडे)",
+                    purchasePrice: "₹४,७५,००० (खरेदी)",
+                    description: "नवीन Mahindra ट्रॅक्टर. इंधन कार्यक्षम, सर्व्हिसिंगसह उपलब्ध. छोट्या आणि मध्यम शेतांसाठी योग्य.",
+                    image: "MAHINDRA-475-DI-XP-PLUS-desktop.jpg"
+                },
+                machine5: {
+                    id: 'machine5',
+                    type: 'machine',
+                    category: 'tiller',
+                    title: "रोटाव्हेटर",
+                    specs: "२५ एचपी, २०२१ मॉडेल",
+                    rentPrice: "₹८००/दिवस (भाडे)",
+                    purchasePrice: "₹२,८०,००० (खरेदी)",
+                    description: "माती तयार करण्यासाठी उत्तम रोटाव्हेटर. जुनी पिके मिसळण्यासाठी आणि नवीन पिकांसाठी माती तयार करण्यासाठी योग्य.",
+                    image: "AG213_Sakthiman_rotavator.jpg"
+                },
+                product1: {
+                    id: 'product1',
+                    type: 'product',
+                    title: "हायब्रीड गहू बियाणे",
+                    specs: "उच्च उत्पादन क्षमता",
+                    price: "₹१,२००/किलो",
+                    description: "नवीन हायब्रीड गहू बियाणे जे सामान्य बियाण्यांपेक्षा 30% जास्त उत्पादन देते. रोग प्रतिरोधक क्षमता, कमी पाण्याची आवश्यकता. प्रमाणित आणि चाचणी केलेले.",
+                    image: "wheatseeds.jpeg"
+                },
+                product2: {
+                    id: 'product2',
+                    type: 'product',
+                    title: "सेंद्रिय खते",
+                    specs: "५० किलो पिशवी",
+                    price: "₹८००/पिशवी",
+                    description: "100% नैसर्गिक सेंद्रिय खते. मातीची सुपिकता वाढवते, पिकांची वाढ आणि आरोग्य सुधारते. कोणत्याही हानिकारक रसायनांशिवाय. सर्व प्रकारच्या पिकांसाठी योग्य.",
+                    image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ce?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                },
+                product3: {
+                    id: 'product3',
+                    type: 'product',
+                    title: "जैविक कीटकनाशक",
+                    specs: "पिकांसाठी सुरक्षित",
+                    price: "₹१,५००/लिटर",
+                    description: "नैसर्गिक जैविक कीटकनाशक जे हानिकारक कीटक नियंत्रित करते परंतु मधमाश्या आणि इतर उपयुक्त कीटकांना हानी पोहोचवत नाही. मानव आणि प्राण्यांसाठी सुरक्षित.",
+                    image: "pest.jpg"
+                }
+            };
+
+            const showProductDetails = (productId) => {
+                setModalContent(products[productId]);
+                setShowModal(true);
+                setShowBookingForm(false);
+            };
+
+            const closeModal = () => {
+                setShowModal(false);
+                setShowBookingForm(false);
+            };
+
+            const addToCart = () => {
+                setCartCount(cartCount + 1);
+                alert(`${modalContent.title} कार्टमध्ये जोडले गेले आहे!`);
+                closeModal();
+            };
+
+            const handleBookNow = () => {
+                setShowBookingForm(true);
+            };
+
+            const handleBookingSubmit = (e) => {
+                e.preventDefault();
+                alert(`बुकिंगची मागणी पाठवली गेली आहे!\n\nतपशील:\nनाव: ${bookingDetails.name}\nसंपर्क: ${bookingDetails.contact}\nतारीख: ${bookingDetails.date}\nकालावधी: ${bookingDetails.duration}`);
+                setCartCount(cartCount + 1);
+                setBookingDetails({
+                    name: '',
+                    contact: '',
+                    date: '',
+                    duration: '',
+                    message: ''
+                });
+                closeModal();
+            };
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setBookingDetails(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleSearch = () => {
+                if (searchQuery.trim()) {
+                    alert(`तुम्ही "${searchQuery}" साठी शोधत आहात`);
+                    setSearchQuery("");
+                }
+            };
+
+            const handleLogout = () => {
+                alert("तुम्ही यशस्वीरित्या लॉगआउट केले आहे");
+            };
+
+            const handleListLand = () => {
+                alert("तुमची जमीन सूचीबद्ध करण्यासाठी आम्ही तुमच्याशी लवकरच संपर्क साधू");
+            };
+
+            const handleExploreMachinery = () => {
+                setActiveSection("machinery");
+                document.getElementById("machinery").scrollIntoView({ behavior: "smooth" });
+            };
+
+            const handleCategoryClick = (category) => {
+                setActiveSection(category);
+                document.getElementById(category).scrollIntoView({ behavior: "smooth" });
+            };
+
+            const handleNavLinkClick = (section) => {
+                setActiveSection(section);
+                document.getElementById(section).scrollIntoView({ behavior: "smooth" });
+            };
+
+            const handleLandSizeFilter = (size) => {
+                setLandSizeFilter(size);
+            };
+
+            const handleMachineTypeFilter = (type) => {
+                setMachineTypeFilter(type);
+            };
+
+            const showLocation = (coordinates) => {
+                // Show the map modal
+                document.getElementById('mapModal').classList.add('show');
+
+                // Initialize the map if not already initialized
+                if (!mapInitialized) {
+                    const map = L.map('farmland-map').setView([20.5937, 78.9629], 5);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+
+                    // Add geocoder control
+                    L.Control.geocoder({
+                        defaultMarkGeocode: false,
+                        position: 'topleft',
+                        collapsed: false,
+                        placeholder: 'Search for farmland...',
+                        errorMessage: 'Location not found.'
+                    }).addTo(map);
+
+                    // Handle locate me button
+                    document.getElementById('locate-me').addEventListener('click', function () {
+                        if (!navigator.geolocation) {
+                            alert("Geolocation is not supported by your browser");
+                            return;
+                        }
+
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+
+                            L.marker(latlng).addTo(map)
+                                .bindPopup("<b>Your Location</b><br>Potential farmland nearby")
+                                .openPopup();
+
+                            L.circle(latlng, {
+                                color: 'blue',
+                                fillColor: '#30f',
+                                fillOpacity: 0.2,
+                                radius: position.coords.accuracy
+                            }).addTo(map);
+
+                            map.setView(latlng, 13);
+                        }, function () {
+                            alert("Unable to retrieve your location");
+                        });
+                    });
+
+                    // Handle add farm button
+                    document.getElementById('add-farm').addEventListener('click', function () {
+                        alert("Farmland addition feature will be implemented soon!");
+                    });
+
+                    window.farmlandMap = map;
+                    setMapInitialized(true);
+                }
+
+                // Center the map on the coordinates and add a marker
+                window.farmlandMap.setView(coordinates, 13);
+
+                // Clear existing markers
+                if (window.farmlandMarker) {
+                    window.farmlandMap.removeLayer(window.farmlandMarker);
+                }
+
+                // Add new marker
+                window.farmlandMarker = L.marker(coordinates).addTo(window.farmlandMap)
+                    .bindPopup(`<b>${modalContent.title}</b><br>${modalContent.location}<br>Size: ${modalContent.size || 'N/A'}<br>Price: ${modalContent.price}`)
+                    .openPopup();
+            };
+
+            const showWeatherForecast = () => {
+                alert("Weather forecast feature will be implemented soon!");
+            };
+
+            // Close map modal when close button is clicked
+            useEffect(() => {
+                const closeMapModal = document.getElementById('closeMapModal');
+                if (closeMapModal) {
+                    closeMapModal.addEventListener('click', () => {
+                        document.getElementById('mapModal').classList.remove('show');
+                    });
+                }
+
+                return () => {
+                    if (closeMapModal) {
+                        closeMapModal.removeEventListener('click', () => {
+                            document.getElementById('mapModal').classList.remove('show');
+                        });
+                    }
+                };
+            }, []);
+
+            // Filter products based on selected filters
+            const filteredLands = Object.values(products).filter(
+                product => product.type === 'land' &&
+                    (landSizeFilter === 'all' || product.size === landSizeFilter)
+            );
+
+            const filteredMachines = Object.values(products).filter(
+                product => product.type === 'machine' &&
+                    (machineTypeFilter === 'all' || product.category === machineTypeFilter)
+            );
+
+            return (
+                <div>
+                    {/* Navigation Bar */}
+                    <nav className="navbar">
+                        <div className="nav-container">
+                            <div className="logo" onClick={() => handleNavLinkClick("home")}>
+                                <h1><i className="fas fa-tractor"></i> AgriLease</h1>
+                            </div>
+                            <div className="search-bar">
+                                <input
+                                    type="text"
+                                    placeholder="जमिनी, यंत्रे, बियाणे शोधा..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                />
+                                <button onClick={handleSearch}><i className="fas fa-search"></i></button>
+                            </div>
+                            <div className="nav-links">
+                                <a href="#home" onClick={() => handleNavLinkClick("home")}>मुख्यपृष्ठ</a>
+                                <a href="#lands" onClick={() => handleNavLinkClick("lands")}>जमीन भाड्याने द्या</a>
+                                <a href="#machinery" onClick={() => handleNavLinkClick("machinery")}>शेती यंत्रे</a>
+                                <a href="#products" onClick={() => handleNavLinkClick("products")}>उत्पादने</a>
+                                <a href="#about" onClick={() => handleNavLinkClick("about")}>आमच्याबद्दल</a>
+                                <button
+                                    className="weather-btn"
+                                    onClick={() => window.location.href = 'WeatherForecast.html'}
+                                >
+                                    <i className="fas fa-cloud-sun"></i> हवामान
+                                </button>
+
+                                <div className="cart-icon" onClick={() => alert("कार्ट पृष्ठावर नेण्यात आले आहे")}>
+                                    <i className="fas fa-shopping-cart"></i>
+                                    <span className="cart-count">{cartCount}</span>
+                                </div>
+                                <div className="user-icon">
+                                    <i className="fas fa-user-circle" style={{ fontSize: '1.5rem' }}></i>
+                                    <div className="user-dropdown">
+                                        <a href="#" onClick={(e) => { e.preventDefault(); alert("प्रोफाइल पृष्ठावर नेण्यात आले आहे"); }}>माझे प्रोफाइल</a>
+                                        <a href="#" onClick={(e) => { e.preventDefault(); alert("ऑर्डर पृष्ठावर नेण्यात आले आहे"); }}>माझ्या ऑर्डर</a>
+                                        <button className="logout-btn" onClick={handleLogout}>बाहेर पडा</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="hero" id="home">
+                        <div className="hero-content">
+                            <h2>शेतकऱ्यांना सक्षम करणे, एकत्र प्रगती करणे</h2>
+                            <p>शेतीची जमीन भाड्याने द्या, यंत्रे भाड्याने घ्या, आणि शेती उत्पादने खरेदी करा – एकाच ठिकाणी</p>
+                            <div className="hero-buttons">
+                                <button className="primary-btn" onClick={handleListLand}>तुमची जमीन सूचीबद्ध करा</button>
+                                <button className="secondary-btn" onClick={handleExploreMachinery}>यंत्रे एक्सप्लोर करा</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Quick Categories */}
+                    <section className="quick-categories">
+                        <div className="category-card"
+                            style={{ backgroundImage: "url('land4.jpg')" }}
+                            onClick={() => handleCategoryClick("lands")}>
+                            <h3>जमीन भाड्याने द्या</h3>
+                        </div>
+                        <div className="category-card"
+                            style={{ backgroundImage: "url('tactor.jpg')" }}
+                            onClick={() => handleCategoryClick("machinery")}>
+                            <h3>यंत्रे भाड्याने घ्या</h3>
+                        </div>
+                        <div className="category-card"
+                            style={{ backgroundImage: "url('download.jpeg')" }}
+                            onClick={() => handleCategoryClick("products")}>
+                            <h3>बियाणे खरेदी करा</h3>
+                        </div>
+                        <div className="category-card"
+                            style={{ backgroundImage: "url('image4.jpg')" }}
+                            onClick={() => handleCategoryClick("products")}>
+                            <h3>खते</h3>
+                        </div>
+                    </section>
+
+                    {/* Featured Lands */}
+                    <section className="product-section" id="lands">
+                        <h2 className="section-title">भाड्याने उपलब्ध जमीन</h2>
+                        <div className="land-size-filter">
+                            <button
+                                className={`filter-btn ${landSizeFilter === 'all' ? 'active' : ''}`}
+                                onClick={() => handleLandSizeFilter('all')}
+                            >
+                                सर्व
+                            </button>
+                            <button
+                                className={`filter-btn ${landSizeFilter === '3-5' ? 'active' : ''}`}
+                                onClick={() => handleLandSizeFilter('3-5')}
+                            >
+                                ३-५ एकर
+                            </button>
+                            <button
+                                className={`filter-btn ${landSizeFilter === '5-10' ? 'active' : ''}`}
+                                onClick={() => handleLandSizeFilter('5-10')}
+                            >
+                                ५-१० एकर
+                            </button>
+                            <button
+                                className={`filter-btn ${landSizeFilter === '10-20' ? 'active' : ''}`}
+                                onClick={() => handleLandSizeFilter('10-20')}
+                            >
+                                १०-२० एकर
+                            </button>
+                            <button
+                                className={`filter-btn ${landSizeFilter === '20+' ? 'active' : ''}`}
+                                onClick={() => handleLandSizeFilter('20+')}
+                            >
+                                २०+ एकर
+                            </button>
+                        </div>
+                        <div className="product-grid">
+                            {filteredLands.map(land => (
+                                <div className="product-card" key={land.id} onClick={() => showProductDetails(land.id)}>
+                                    <img src={land.image} alt={land.title} />
+                                    <h3>{land.title}</h3>
+                                    <p>{land.location}</p>
+                                    <div className="price">{land.price}</div>
+                                    <button
+                                        className="location-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            showLocation(land.coordinates);
+                                        }}
+                                    >
+                                        <i className="fas fa-map-marker-alt"></i> स्थान पहा
+                                    </button>
+                                    <button
+                                        className="quick-view"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            showProductDetails(land.id);
+                                        }}
+                                    >
+                                        तपशील पहा
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Machinery */}
+                    <section className="product-section" id="machinery">
+                        <h2 className="section-title">भाड्याने/खरेदीसाठी यंत्रे</h2>
+                        <div className="machine-type-filter">
+                            <button
+                                className={`filter-btn ${machineTypeFilter === 'all' ? 'active' : ''}`}
+                                onClick={() => handleMachineTypeFilter('all')}
+                            >
+                                सर्व
+                            </button>
+                            <button
+                                className={`filter-btn ${machineTypeFilter === 'tractor' ? 'active' : ''}`}
+                                onClick={() => handleMachineTypeFilter('tractor')}
+                            >
+                                ट्रॅक्टर
+                            </button>
+                            <button
+                                className={`filter-btn ${machineTypeFilter === 'harvester' ? 'active' : ''}`}
+                                onClick={() => handleMachineTypeFilter('harvester')}
+                            >
+                                हार्वेस्टर
+                            </button>
+                            <button
+                                className={`filter-btn ${machineTypeFilter === 'irrigation' ? 'active' : ''}`}
+                                onClick={() => handleMachineTypeFilter('irrigation')}
+                            >
+                                सिंचन
+                            </button>
+                            <button
+                                className={`filter-btn ${machineTypeFilter === 'tiller' ? 'active' : ''}`}
+                                onClick={() => handleMachineTypeFilter('tiller')}
+                            >
+                                टिलर
+                            </button>
+                        </div>
+                        <div className="product-grid">
+                            {filteredMachines.map(machine => (
+                                <div className="product-card" key={machine.id} onClick={() => showProductDetails(machine.id)}>
+                                    <img src={machine.image} alt={machine.title} />
+                                    <h3>{machine.title}</h3>
+                                    <p>{machine.specs}</p>
+                                    <div className="price">{machine.rentPrice}</div>
+                                    <div className="price">{machine.purchasePrice}</div>
+                                    <button
+                                        className="quick-view"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            showProductDetails(machine.id);
+                                        }}
+                                    >
+                                        तपशील पहा
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Products */}
+                    <section className="product-section" id="products">
+                        <h2 className="section-title">शेती उत्पादने</h2>
+                        <div className="product-grid">
+                            <div className="product-card" onClick={() => showProductDetails('product1')}>
+                                <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Hybrid Wheat Seeds" />
+                                <h3>हायब्रीड गहू बियाणे</h3>
+                                <p>उच्च उत्पादन क्षमता</p>
+                                <div className="price">₹१,२००/किलो</div>
+                                <button className="quick-view" onClick={(e) => { e.stopPropagation(); showProductDetails('product1'); }}>तपशील पहा</button>
+                            </div>
+                            <div className="product-card" onClick={() => showProductDetails('product2')}>
+                                <img src="organic_fertilizer.jpg" alt="Organic Fertilizer" />
+                                <h3>सेंद्रिय खते</h3>
+                                <p>५० किलो पिशवी</p>
+                                <div className="price">₹८००/पिशवी</div>
+                                <button className="quick-view" onClick={(e) => { e.stopPropagation(); showProductDetails('product2'); }}>तपशील पहा</button>
+                            </div>
+                            <div className="product-card" onClick={() => showProductDetails('product3')}>
+                                <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Bio Pesticide" />
+                                <h3>जैविक कीटकनाशक</h3>
+                                <p>पिकांसाठी सुरक्षित</p>
+                                <div className="price">₹१,५००/लिटर</div>
+                                <button className="quick-view" onClick={(e) => { e.stopPropagation(); showProductDetails('product3'); }}>तपशील पहा</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* About Section */}
+                    <section className="product-section" id="about">
+                        <h2 className="section-title">आमच्याबद्दल</h2>
+                        <div style={{ background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                            <p>AgriLease हा शेतकऱ्यांसाठीचा एक डिजिटल मार्केटप्लेस आहे जो शेतजमीन भाड्याने देणे आणि घेणे, शेती यंत्रे भाड्याने देणे आणि घेणे, तसेच शेती संबंधित उत्पादनांच्या खरेदी-विक्रीसाठी एकच व्यासपीठ उपलब्ध करून देते.</p>
+                            <p>आमचे उद्दिष्ट शेतकऱ्यांना आवश्यक संसाधनांसह सहजतेने जोडणे आणि शेतीच्या खर्चात बचत करण्यास मदत करणे आहे.</p>
+                        </div>
+                    </section>
+
+                    {/* Modal */}
+                    <div className={`modal ${showModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <button className="close-btn" onClick={closeModal}>&times;</button>
+                            <div className="modal-body">
+                                {modalContent && (
+                                    <>
+                                        <img src={modalContent.image} alt={modalContent.title} />
+                                        <h2>{modalContent.title}</h2>
+                                        {modalContent.location && (
+                                            <p>
+                                                <strong>स्थान:</strong> {modalContent.location}
+                                                <button
+                                                    className="location-btn"
+                                                    onClick={() => showLocation(modalContent.coordinates)}
+                                                    style={{ marginLeft: '10px', width: 'auto', display: 'inline-flex' }}
+                                                >
+                                                    <i className="fas fa-map-marker-alt"></i> स्थान पहा
+                                                </button>
+                                            </p>
+                                        )}
+                                        {modalContent.specs && <p><strong>तपशील:</strong> {modalContent.specs}</p>}
+                                        {modalContent.price && <p><strong>किंमत:</strong> {modalContent.price}</p>}
+                                        {modalContent.rentPrice && <p><strong>भाडे किंमत:</strong> {modalContent.rentPrice}</p>}
+                                        {modalContent.purchasePrice && <p><strong>खरेदी किंमत:</strong> {modalContent.purchasePrice}</p>}
+                                        <p><strong>वर्णन:</strong> {modalContent.description}</p>
+
+                                        {showBookingForm ? (
+                                            <div className="booking-form">
+                                                <h3>बुकिंगची माहिती</h3>
+                                                <form onSubmit={handleBookingSubmit}>
+                                                    <div className="form-group">
+                                                        <label htmlFor="name">पूर्ण नाव</label>
+                                                        <input
+                                                            type="text"
+                                                            id="name"
+                                                            name="name"
+                                                            value={bookingDetails.name}
+                                                            onChange={handleInputChange}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="contact">संपर्क क्रमांक</label>
+                                                        <input
+                                                            type="tel"
+                                                            id="contact"
+                                                            name="contact"
+                                                            value={bookingDetails.contact}
+                                                            onChange={handleInputChange}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    {modalContent.type === 'land' && (
+                                                        <div className="form-group">
+                                                            <label htmlFor="duration">भाड्याचा कालावधी</label>
+                                                            <select
+                                                                id="duration"
+                                                                name="duration"
+                                                                value={bookingDetails.duration}
+                                                                onChange={handleInputChange}
+                                                                required
+                                                            >
+                                                                <option value="">निवडा</option>
+                                                                <option value="1 महिना">1 महिना</option>
+                                                                <option value="3 महिने">3 महिने</option>
+                                                                <option value="6 महिने">6 महिने</option>
+                                                                <option value="1 वर्ष">1 वर्ष</option>
+                                                                <option value="2 वर्षे">2 वर्षे</option>
+                                                            </select>
+                                                        </div>
+                                                    )}
+                                                    {modalContent.type === 'machine' && (
+                                                        <div className="form-group">
+                                                            <label htmlFor="duration">भाड्याचा कालावधी</label>
+                                                            <select
+                                                                id="duration"
+                                                                name="duration"
+                                                                value={bookingDetails.duration}
+                                                                onChange={handleInputChange}
+                                                                required
+                                                            >
+                                                                <option value="">निवडा</option>
+                                                                <option value="1 दिवस">1 दिवस</option>
+                                                                <option value="1 आठवडा">1 आठवडा</option>
+                                                                <option value="2 आठवडे">2 आठवडे</option>
+                                                                <option value="1 महिना">1 महिना</option>
+                                                            </select>
+                                                        </div>
+                                                    )}
+                                                    <div className="form-group">
+                                                        <label htmlFor="date">प्रारंभ तारीख</label>
+                                                        <input
+                                                            type="date"
+                                                            id="date"
+                                                            name="date"
+                                                            value={bookingDetails.date}
+                                                            onChange={handleInputChange}
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div className="form-group">
+                                                        <label htmlFor="message">अतिरिक्त माहिती (पर्यायी)</label>
+                                                        <textarea
+                                                            id="message"
+                                                            name="message"
+                                                            value={bookingDetails.message}
+                                                            onChange={handleInputChange}
+                                                            rows="3"
+                                                        ></textarea>
+                                                    </div>
+                                                    <div className="modal-buttons">
+                                                        <button type="submit" className="primary-btn">बुकिंग पाठवा</button>
+                                                        <button type="button" className="secondary-btn" onClick={() => setShowBookingForm(false)}>मागे जा</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        ) : (
+                                            <div className="modal-buttons">
+                                                {modalContent.type !== 'product' && (
+                                                    <button className="primary-btn" onClick={handleBookNow}>आता बुक करा</button>
+                                                )}
+                                                <button className="secondary-btn" onClick={addToCart}>कार्टमध्ये जोडा</button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer>
+                        <div className="footer-container">
+                            <div className="footer-section">
+                                <h3>AgriLease</h3>
+                                <p>शेतकऱ्यांना आवश्यक संसाधनांशी जोडणारा मंच.</p>
+                            </div>
+                            <div className="footer-section">
+                                <h3>जलद दुवे</h3>
+                                <ul>
+                                    <li><a href="#home" onClick={() => handleNavLinkClick("home")}>मुख्यपृष्ठ</a></li>
+                                    <li><a href="#lands" onClick={() => handleNavLinkClick("lands")}>जमीन भाड्याने द्या</a></li>
+                                    <li><a href="#machinery" onClick={() => handleNavLinkClick("machinery")}>शेती यंत्रे</a></li>
+                                    <li><a href="#products" onClick={() => handleNavLinkClick("products")}>उत्पादने</a></li>
+                                </ul>
+                            </div>
+                            <div className="footer-section">
+                                <h3>आमच्याशी संपर्क साधा</h3>
+                                <p><i className="fas fa-phone"></i> +९१ ९८७६५४३२१०</p>
+                                <p><i className="fas fa-envelope"></i> support@agrilease.com</p>
+                                <p><i className="fas fa-map-marker-alt"></i> बेंगळुरू, भारत</p>
+                            </div>
+                        </div>
+                        <div className="footer-bottom">
+                            <p>&copy; २०२३ AgriLease. सर्व हक्क राखीव.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AgriLeaseApp />);
+    </script>
+
+    <!-- Load Leaflet JS after React renders the map modal -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+</body>
+
+</html>

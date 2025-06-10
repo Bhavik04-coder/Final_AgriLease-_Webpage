@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weather App</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      overflow: hidden;
+      transition: background 1s ease;
+    }
+
+    /* Weather backgrounds */
+    .sunny {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    }
+    .cloudy {
+      background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+    }
+    .rainy {
+      background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+    }
+    .snowy {
+      background: linear-gradient(135deg, #e6e9f0 0%, #eef1f5 100%);
+    }
+    .clear {
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    }
+    .default-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .weather-container {
+      background: rgba(255, 255, 255, 0.9);
+      max-width: 500px;
+      margin: auto;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      backdrop-filter: blur(5px);
+    }
+
+    input {
+      padding: 0.8rem;
+      margin: 1rem 0;
+      width: 70%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.8);
+    }
+
+    button {
+      padding: 0.8rem 1.5rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #388E3C;
+      transform: translateY(-2px);
+    }
+
+    .weather-info {
+      margin-top: 2rem;
+      transition: all 0.5s ease;
+    }
+
+    .error {
+      color: #d32f2f;
+      margin: 1rem 0;
+    }
+
+    /* Weather icons */
+    .weather-icon {
+      font-size: 4rem;
+      margin: 1rem 0;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Weather elements */
+    .sun {
+      position: absolute;
+      top: 50px;
+      right: 100px;
+      width: 100px;
+      height: 100px;
+      background: #ffde59;
+      border-radius: 50%;
+      box-shadow: 0 0 50px #ffde59;
+      animation: pulse 3s infinite alternate;
+    }
+
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    .rain {
+      position: absolute;
+      width: 2px;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .snow {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+
+    /* Animation keyframes */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    @keyframes rain {
+      0% { transform: translateY(-100px); }
+      100% { transform: translateY(100vh); }
+    }
+
+    @keyframes snow {
+      0% { transform: translateY(-100px) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
+
+    @keyframes cloudMove {
+      0% { transform: translateX(-100px); }
+      100% { transform: translateX(100vw); }
+    }
+
+    .loading {
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    .temp-display {
+      font-size: 3rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      position: relative;
+      display: inline-block;
+    }
+
+    .temp-display::after {
+      content: '°C';
+      font-size: 1.5rem;
+      position: absolute;
+      top: 0;
+      right: -1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function WeatherApp() {
+      const [location, setLocation] = React.useState('');
+      const [weather, setWeather] = React.useState(null);
+      const [error, setError] = React.useState('');
+      const [loading, setLoading] = React.useState(true);
+      const [weatherElements, setWeatherElements] = React.useState([]);
+
+      const API_KEY = '49ae71cb597844af97493843250806';
+
+      React.useEffect(() => {
+        // Get user's current location on first load
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              fetchWeather(`${latitude},${longitude}`);
+            },
+            (err) => {
+              setError('Location access denied. Please enter a location manually.');
+              setLoading(false);
+            }
+          );
+        } else {
+          setError('Geolocation is not supported by your browser.');
+          setLoading(false);
+        }
+      }, []);
+
+      const fetchWeather = async (query) => {
+        try {
+          setLoading(true);
+          const response = await fetch(
+            `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${query || location}`
+          );
+          
+          if (!response.ok) throw new Error('Location not found');
+          
+          const data = await response.json();
+          setWeather({
+            temp: data.current.temp_c,
+            condition: data.current.condition.text.toLowerCase(),
+            city: data.location.name,
+            country: data.location.country,
+            icon: data.current.condition.icon
+          });
+          setError('');
+          createWeatherElements(data.current.condition.text.toLowerCase());
+        } catch (err) {
+          setError(err.message);
+          setWeather(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const createWeatherElements = (condition) => {
+        const elements = [];
+        
+        // Clear previous elements
+        setWeatherElements([]);
+        
+        // Create elements based on weather condition
+        if (condition.includes('sunny') || condition.includes('clear')) {
+          elements.push(<div key="sun" className="sun"></div>);
+          
+          // Add some clouds for variety
+          for (let i = 0; i < 3; i++) {
+            const size = Math.random() * 50 + 30;
+            const top = Math.random() * 200 + 50;
+            const left = Math.random() * window.innerWidth;
+            const opacity = Math.random() * 0.3 + 0.5;
+            const speed = Math.random() * 100 + 50;
+            
+            elements.push(
+              <div 
+                key={`cloud-${i}`}
+                className="cloud"
+                style={{
+                  width: `${size}px`,
+                  height: `${size/2}px`,
+                  top: `${top}px`,
+                  left: `${left}px`,
+                  opacity: opacity,
+                  animation: `cloudMove ${speed}s linear infinite`
+                }}
+              ></div>
+            );
+          }
+        } 
+        else if (condition.includes('cloudy') || condition.includes('overcast')) {
+          for (let i = 0; i < 5; i++) {
+            const size = Math.random() * 80 + 40;
+            const top = Math.random() * 300 + 50;
+            const left = Math.random() * window.innerWidth;
+            const opacity = Math.random() * 0.5 + 0.3;
+            const speed = Math.random() * 150 + 100;
+            
+            elements.push(
+              <div 
+                key={`cloud-${i}`}
+                className="cloud"
+                style={{
+                  width: `${size}px`,
+                  height: `${size/2}px`,
+                  top: `${top}px`,
+                  left: `${left}px`,
+                  opacity: opacity,
+                  animation: `cloudMove ${speed}s linear infinite`
+                }}
+              ></div>
+            );
+          }
+        } 
+        else if (condition.includes('rain') || condition.includes('drizzle')) {
+          for (let i = 0; i < 50; i++) {
+            const left = Math.random() * window.innerWidth;
+            const length = Math.random() * 20 + 10;
+            const delay = Math.random() * 2;
+            const duration = Math.random() * 0.5 + 0.5;
+            
+            elements.push(
+              <div 
+                key={`rain-${i}`}
+                className="rain"
+                style={{
+                  height: `${length}px`,
+                  left: `${left}px`,
+                  top: '-20px',
+                  animation: `rain ${duration}s linear infinite ${delay}s`
+                }}
+              ></div>
+            );
+          }
+        } 
+        else if (condition.includes('snow') || condition.includes('ice')) {
+          for (let i = 0; i < 30; i++) {
+            const left = Math.random() * window.innerWidth;
+            const size = Math.random() * 5 + 3;
+            const delay = Math.random() * 5;
+            const duration = Math.random() * 10 + 5;
+            
+            elements.push(
+              <div 
+                key={`snow-${i}`}
+                className="snow"
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  left: `${left}px`,
+                  top: '-20px',
+                  animation: `snow ${duration}s linear infinite ${delay}s`
+                }}
+              ></div>
+            );
+          }
+        }
+        
+        setWeatherElements(elements);
+      };
+
+      const getWeatherClass = () => {
+        if (!weather) return 'default-bg';
+        
+        if (weather.condition.includes('sunny') || weather.condition.includes('clear')) {
+          return 'sunny';
+        } else if (weather.condition.includes('cloudy') || weather.condition.includes('overcast')) {
+          return 'cloudy';
+        } else if (weather.condition.includes('rain') || weather.condition.includes('drizzle')) {
+          return 'rainy';
+        } else if (weather.condition.includes('snow') || weather.condition.includes('ice')) {
+          return 'snowy';
+        } else {
+          return 'default-bg';
+        }
+      };
+
+      const getWeatherIcon = () => {
+        if (!weather) return '☀️';
+        
+        if (weather.condition.includes('sunny') || weather.condition.includes('clear')) {
+          return '☀️';
+        } else if (weather.condition.includes('cloudy')) {
+          return '☁️';
+        } else if (weather.condition.includes('rain')) {
+          return '🌧️';
+        } else if (weather.condition.includes('snow')) {
+          return '❄️';
+        } else if (weather.condition.includes('thunder')) {
+          return '⛈️';
+        } else {
+          return '🌈';
+        }
+      };
+
+      return (
+        <div className={getWeatherClass()}>
+          {weatherElements}
+          <div className="weather-container">
+            <h1>Weather App</h1>
+            <div>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Enter location"
+                onKeyPress={(e) => e.key === 'Enter' && fetchWeather()}
+              />
+              <button onClick={() => fetchWeather()}>Get Weather</button>
+            </div>
+
+            {loading && <div className="loading">Loading weather data...</div>}
+            {error && <div className="error">{error}</div>}
+
+            {weather && (
+              <div className="weather-info">
+                <h2>{weather.city}, {weather.country}</h2>
+                <div className="weather-icon">{getWeatherIcon()}</div>
+                <div className="temp-display">{weather.temp}</div>
+                <p>{weather.condition.charAt(0).toUpperCase() + weather.condition.slice(1)}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<WeatherApp />, document.getElementById('root'));
+  </script>
+</body>
+</html>

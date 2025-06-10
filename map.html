@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AgriLease - Farm Land Mapping</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+    #map { 
+      height: 100vh; 
+    }
+    .search-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      width: 300px;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .agrilease-controls {
+      position: absolute;
+      top: 60px;
+      left: 10px;
+      z-index: 1000;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .agrilease-logo {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.8);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      margin-top: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388E3C;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search for farmland locations..." style="width: 100%; padding: 8px; box-sizing: border-box;">
+  </div>
+  
+  <div class="agrilease-controls">
+    <button id="locate-me">Show My Location</button>
+    <button id="add-farm">Add Farmland</button>
+  </div>
+  
+  <div class="agrilease-logo">AgriLease</div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <script>
+    // Initialize the map centered on India
+    var map = L.map('map').setView([20.5937, 78.9629], 5);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Initialize the geocoder control
+    var geocoder = L.Control.Geocoder.nominatim();
+    var searchControl = L.Control.geocoder({
+      defaultMarkGeocode: false,
+      position: 'topleft',
+      collapsed: false,
+      placeholder: 'Search for farmland...',
+      errorMessage: 'Location not found.'
+    }).addTo(map);
+    
+    // Customize the search control
+    document.querySelector('.leaflet-control-geocoder-form input').id = 'search-input';
+    document.querySelector('.leaflet-control-geocoder-form input').placeholder = 'Search farmland locations...';
+    
+    // When a location is found through search
+    searchControl.on('markgeocode', function(e) {
+      var bbox = e.geocode.bbox;
+      var poly = L.polygon([
+        bbox.getSouthEast(),
+        bbox.getNorthEast(),
+        bbox.getNorthWest(),
+        bbox.getSouthWest()
+      ]);
+      map.fitBounds(poly.getBounds());
+      
+      // Add a marker with farmland info
+      L.marker(e.geocode.center).addTo(map)
+        .bindPopup(`<b>Farmland Location</b><br>${e.geocode.name}<br><button onclick="showFarmDetails()">View Details</button>`)
+        .openPopup();
+    });
+    
+    // Show user's location
+    document.getElementById('locate-me').addEventListener('click', function() {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+        
+        // Add a marker for user's location
+        L.marker(latlng).addTo(map)
+          .bindPopup("<b>Your Location</b><br>Potential farmland nearby")
+          .openPopup();
+          
+        // Add a circle to show accuracy
+        L.circle(latlng, {
+          color: 'blue',
+          fillColor: '#30f',
+          fillOpacity: 0.2,
+          radius: position.coords.accuracy
+        }).addTo(map);
+        
+        map.setView(latlng, 13);
+      }, function() {
+        alert("Unable to retrieve your location");
+      });
+    });
+    
+    // Add farmland button functionality
+    document.getElementById('add-farm').addEventListener('click', function() {
+      alert("Farmland addition feature will be implemented soon!");
+      // Future implementation: Draw polygon for farmland boundaries
+    });
+    
+    // Function to show farm details (placeholder)
+    window.showFarmDetails = function() {
+      alert("Farm details:\n\nSize: 5 acres\nSoil Type: Loamy\nWater Availability: Good\nLease Price: ₹15,000/year");
+    }
+    
+    // Add some sample farmland markers (in a real app, these would come from a database)
+    var sampleFarms = [
+      {lat: 19.0760, lng: 72.8777, name: "Mumbai Farmland", size: "3 acres", price: "₹12,000/year"},
+      {lat: 28.6139, lng: 77.2090, name: "Delhi Organic Farm", size: "7 acres", price: "₹25,000/year"},
+      {lat: 12.9716, lng: 77.5946, name: "Bangalore Agri Plot", size: "5 acres", price: "₹18,000/year"},
+      {lat: 17.3850, lng: 78.4867, name: "Hyderabad Fertile Land", size: "10 acres", price: "₹30,000/year"}
+    ];
+    
+    sampleFarms.forEach(function(farm) {
+      L.marker([farm.lat, farm.lng]).addTo(map)
+        .bindPopup(`<b>${farm.name}</b><br>Size: ${farm.size}<br>Price: ${farm.price}<br><button onclick="showFarmDetails()">View Details</button>`);
+    });
+  </script>
+</body>
+</html>
