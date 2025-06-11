@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        /* Base Styles */
+          /* Base Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -738,6 +738,27 @@
                 height: 200px;
             }
         }
+        .loading-spinner {
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #388e3c;
+            border-radius: 50%;
+            width: 17px;
+            height: 17px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg);}
+            100% { transform: rotate(360deg);}
+        }
+        
+        .primary-btn:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -776,6 +797,7 @@
             const [landSizeFilter, setLandSizeFilter] = useState("all");
             const [machineTypeFilter, setMachineTypeFilter] = useState("all");
             const [mapInitialized, setMapInitialized] = useState(false);
+            const [isSendingEmail, setIsSendingEmail] = useState(false);
 
             const products = {
                 land1: {
@@ -940,23 +962,58 @@
 
             const handleBookingSubmit = (e) => {
                 e.preventDefault();
-                alert(`बुकिंगची मागणी पाठवली गेली आहे!\n\nतपशील:\nनाव: ${bookingDetails.name}\nसंपर्क: ${bookingDetails.contact}\nतारीख: ${bookingDetails.date}\nकालावधी: ${bookingDetails.duration}`);
-                setCartCount(cartCount + 1);
-                setBookingDetails({
-                    name: '',
-                    contact: '',
-                    date: '',
-                    duration: '',
-                    message: ''
-                });
-                closeModal();
+                setIsSendingEmail(true);
+
+                const formData = new FormData();
+                formData.append('_subject', `New Booking Request for ${modalContent.title}`);
+                formData.append('product_title', modalContent.title);
+                formData.append('product_type', modalContent.type === 'land' ? 'Land' : 'Machine');
+                formData.append('product_price', modalContent.price || modalContent.rentPrice);
+                formData.append('product_description', modalContent.description);
+                formData.append('customer_name', bookingDetails.name);
+                formData.append('customer_contact', bookingDetails.contact);
+                formData.append('booking_date', bookingDetails.date);
+                formData.append('booking_duration', bookingDetails.duration);
+                formData.append('additional_message', bookingDetails.message || 'N/A');
+                formData.append('_next', window.location.href);
+
+                fetch('https://formsubmit.co/ajax/bhavikdumore309@gmail.com', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(`Booking request sent successfully!\n\nDetails:\nName: ${bookingDetails.name}\nContact: ${bookingDetails.contact}\nDate: ${bookingDetails.date}\nDuration: ${bookingDetails.duration}`);
+                        setCartCount(cartCount + 1);
+                        setBookingDetails({
+                            name: '',
+                            contact: '',
+                            date: '',
+                            duration: '',
+                            message: ''
+                        });
+                        setIsSendingEmail(false);
+                        closeModal();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('There was an error submitting the form. Please try again.');
+                        setIsSendingEmail(false);
+                    });
             };
 
             const handleInputChange = (e) => {
                 const { name, value } = e.target;
+                const keyMap = {
+                    customer_name: 'name',
+                    customer_contact: 'contact',
+                    booking_date: 'date',
+                    booking_duration: 'duration',
+                    additional_message: 'message'
+                };
                 setBookingDetails(prev => ({
                     ...prev,
-                    [name]: value
+                    [keyMap[name] || name]: value
                 }));
             };
 
@@ -1375,12 +1432,14 @@
                                             <div className="booking-form">
                                                 <h3>बुकिंगची माहिती</h3>
                                                 <form onSubmit={handleBookingSubmit}>
+                                                    <input type="hidden" name="_subject" value={`New Booking Request for ${modalContent.title}`} />
+                                                    <input type="hidden" name="_next" value={window.location.href} />
                                                     <div className="form-group">
                                                         <label htmlFor="name">पूर्ण नाव</label>
                                                         <input
                                                             type="text"
                                                             id="name"
-                                                            name="name"
+                                                            name="customer_name"
                                                             value={bookingDetails.name}
                                                             onChange={handleInputChange}
                                                             required
@@ -1391,46 +1450,39 @@
                                                         <input
                                                             type="tel"
                                                             id="contact"
-                                                            name="contact"
+                                                            name="customer_contact"
                                                             value={bookingDetails.contact}
                                                             onChange={handleInputChange}
                                                             required
                                                         />
                                                     </div>
-                                                    {modalContent.type === 'land' && (
+                                                    {(modalContent.type === 'land' || modalContent.type === 'machine') && (
                                                         <div className="form-group">
                                                             <label htmlFor="duration">भाड्याचा कालावधी</label>
                                                             <select
                                                                 id="duration"
-                                                                name="duration"
+                                                                name="booking_duration"
                                                                 value={bookingDetails.duration}
                                                                 onChange={handleInputChange}
                                                                 required
                                                             >
                                                                 <option value="">निवडा</option>
-                                                                <option value="1 महिना">1 महिना</option>
-                                                                <option value="3 महिने">3 महिने</option>
-                                                                <option value="6 महिने">6 महिने</option>
-                                                                <option value="1 वर्ष">1 वर्ष</option>
-                                                                <option value="2 वर्षे">2 वर्षे</option>
-                                                            </select>
-                                                        </div>
-                                                    )}
-                                                    {modalContent.type === 'machine' && (
-                                                        <div className="form-group">
-                                                            <label htmlFor="duration">भाड्याचा कालावधी</label>
-                                                            <select
-                                                                id="duration"
-                                                                name="duration"
-                                                                value={bookingDetails.duration}
-                                                                onChange={handleInputChange}
-                                                                required
-                                                            >
-                                                                <option value="">निवडा</option>
-                                                                <option value="1 दिवस">1 दिवस</option>
-                                                                <option value="1 आठवडा">1 आठवडा</option>
-                                                                <option value="2 आठवडे">2 आठवडे</option>
-                                                                <option value="1 महिना">1 महिना</option>
+                                                                {modalContent.type === 'land' ? (
+                                                                    <>
+                                                                        <option value="1 महिना">1 महिना</option>
+                                                                        <option value="3 महिने">3 महिने</option>
+                                                                        <option value="6 महिने">6 महिने</option>
+                                                                        <option value="1 वर्ष">1 वर्ष</option>
+                                                                        <option value="2 वर्षे">2 वर्षे</option>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <option value="1 दिवस">1 दिवस</option>
+                                                                        <option value="1 आठवडा">1 आठवडा</option>
+                                                                        <option value="2 आठवडे">2 आठवडे</option>
+                                                                        <option value="1 महिना">1 महिना</option>
+                                                                    </>
+                                                                )}
                                                             </select>
                                                         </div>
                                                     )}
@@ -1439,7 +1491,7 @@
                                                         <input
                                                             type="date"
                                                             id="date"
-                                                            name="date"
+                                                            name="booking_date"
                                                             value={bookingDetails.date}
                                                             onChange={handleInputChange}
                                                             required
@@ -1449,14 +1501,21 @@
                                                         <label htmlFor="message">अतिरिक्त माहिती (पर्यायी)</label>
                                                         <textarea
                                                             id="message"
-                                                            name="message"
+                                                            name="additional_message"
                                                             value={bookingDetails.message}
                                                             onChange={handleInputChange}
                                                             rows="3"
                                                         ></textarea>
                                                     </div>
                                                     <div className="modal-buttons">
-                                                        <button type="submit" className="primary-btn">बुकिंग पाठवा</button>
+                                                        <button type="submit" className="primary-btn" disabled={isSendingEmail}>
+                                                            {isSendingEmail ? (
+                                                                <>
+                                                                    <span className="loading-spinner"></span>
+                                                                    पाठवत आहे...
+                                                                </>
+                                                            ) : 'बुकिंग पाठवा'}
+                                                        </button>
                                                         <button type="button" className="secondary-btn" onClick={() => setShowBookingForm(false)}>मागे जा</button>
                                                     </div>
                                                 </form>
@@ -1514,5 +1573,4 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 </body>
-
 </html>
