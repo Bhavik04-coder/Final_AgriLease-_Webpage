@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>शेतकरी अनुदान पोर्टल | Farmer Subsidy Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-grow: 0.5;
+            margin: 0 20px;
+        }
+
+        .search-bar input {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            width: 100%;
+        }
+
+        .search-bar button {
+            padding: 8px 15px;
+            border: none;
+            background-color: #388E3C;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .nav-links a.active {
+            border-bottom: 2px solid white;
+            padding-bottom: 5px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: #388E3C;
+        }
+
+        .secondary-btn {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .secondary-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Quick Categories */
+        .quick-categories {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .category-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .category-card h3 {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Product Section */
+        .product-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+            color: #2E7D32;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-card h3 {
+            margin: 15px 15px 5px;
+            font-size: 1.2rem;
+        }
+
+        .product-card p {
+            margin: 0 15px 10px;
+            color: #666;
+        }
+
+        .price {
+            margin: 0 15px 15px;
+            font-weight: bold;
+            color: #2E7D32;
+        }
+
+        .quick-view {
+            display: block;
+            width: calc(100% - 30px);
+            margin: 0 15px 15px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .quick-view:hover {
+            background-color: #388E3C;
+        }
+
+        .location-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: calc(100% - 30px);
+            justify-content: center;
+        }
+
+        .location-btn i {
+            font-size: 0.9rem;
+        }
+
+        .location-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* Booking Form */
+        .booking-form {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .booking-form h3 {
+            margin-top: 0;
+            color: #2E7D32;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 20px;
+            color: #2E7D32;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #2E7D32;
+            color: white;
+            padding: 50px 0 0;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            gap: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .footer-section p,
+        .footer-section li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: #d1ffd7;
+        }
+
+        .footer-section i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            background-color: #1B5E20;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #388e3c;
+            border-radius: 50%;
+            width: 17px;
+            height: 17px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .primary-btn:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+
+            .quick-categories,
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                width: 100%;
+                margin: 15px 0;
+                order: 3;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 15px;
+                order: 2;
+                width: 100%;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 576px) {
+
+            .quick-categories,
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links a {
+                margin: 5px;
+                font-size: 0.9rem;
+            }
+
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 90vh;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-body img {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function AgriSubsidyPortal() {
+            const [activeTab, setActiveTab] = useState('home');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [showApplicationForm, setShowApplicationForm] = useState(false);
+            const [formData, setFormData] = useState({
+                name: '',
+                aadhaar: '',
+                mobile: '',
+                district: '',
+                scheme: '',
+                landRecords: '',
+                bankDetails: ''
+            });
+            const [submitted, setSubmitted] = useState(false);
+
+            const schemes = [
+                {
+                    id: 1,
+                    title: "पीएम-किसान सम्मान निधी",
+                    description: "सर्व जमीनधारक शेतकरी कुटुंबांना वर्षाला ₹6,000 तीन समान हप्त्यांमध्ये.",
+                    eligibility: "लहान आणि सीमांत शेतकरी कुटुंबे",
+                    link: "https://pmkisan.gov.in"
+                },
+                {
+                    id: 2,
+                    title: "किसान क्रेडिट कार्ड (केसीसी)",
+                    description: "व्याज सबव्हेंशनसह शेतकऱ्यांसाठी सवलतीचे कर्ज.",
+                    eligibility: "भाडेतत्त्वावर शेती करणारे सर्व शेतकरी",
+                    link: "https://www.nabard.org"
+                },
+                {
+                    id: 3,
+                    title: "मृदा आरोग्य कार्ड योजना",
+                    description: "मृदेच्या पोषक तत्वांची स्थिती आणि शिफारसी प्रदान करते.",
+                    eligibility: "सर्व शेतकरी",
+                    link: "https://soilhealth.dac.gov.in"
+                },
+                {
+                    id: 4,
+                    title: "प्रधानमंत्री फसल बीमा योजना",
+                    description: "नैसर्गिक आपत्तींविरुद्ध कमी प्रीमियमवर पीक विमा.",
+                    eligibility: "भाडेतत्त्वावर शेती करणारे सर्व शेतकरी",
+                    link: "https://pmfby.gov.in"
+                },
+                {
+                    id: 5,
+                    title: "कृषी यंत्रीकरणावरील राष्ट्रीय मिशन",
+                    description: "कृषी यंत्रांच्या खरेदीसाठी अनुदान.",
+                    eligibility: "शेतकरी, शेतकरी गट, सहकारी संस्था",
+                    link: "https://agricoop.nic.in"
+                },
+                {
+                    id: 6,
+                    title: "सूक्ष्म सिंचन निधी",
+                    description: "पाण्याच्या कार्यक्षम वापरासाठी सूक्ष्म सिंचनाला प्रोत्साहन.",
+                    eligibility: "सूक्ष्म सिंचन स्वीकारणारे शेतकरी",
+                    link: "https://pmksy.gov.in"
+                }
+            ];
+
+            const filteredSchemes = schemes.filter(scheme =>
+                scheme.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                scheme.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                // In a real app, you would send this data to a backend
+                console.log('Form submitted:', formData);
+                setSubmitted(true);
+                setTimeout(() => {
+                    setShowApplicationForm(false);
+                    setSubmitted(false);
+                    setFormData({
+                        name: '',
+                        aadhaar: '',
+                        mobile: '',
+                        district: '',
+                        scheme: '',
+                        landRecords: '',
+                        bankDetails: ''
+                    });
+                }, 3000);
+            };
+
+            const openOfficialSite = (url) => {
+                window.open(url, '_blank');
+            };
+
+            return (
+                <div className="agri-subsidy-portal">
+                    {/* Navigation */}
+                    <nav className="navbar">
+                        <div className="nav-container">
+                            <div className="logo">
+                                <i className="fas fa-tractor"></i>
+                                <h1>शेतकरी अनुदान पोर्टल</h1>
+                            </div>
+                            <div className="search-bar">
+                                <input 
+                                    type="text" 
+                                    placeholder="योजना शोधा..." 
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                                <button><i className="fas fa-search"></i></button>
+                            </div>
+                            <div className="nav-links">
+                                <a 
+                                    href="#home" 
+                                    className={activeTab === 'home' ? 'active' : ''}
+                                    onClick={() => setActiveTab('home')}
+                                >
+                                    मुख्यपृष्ठ
+                                </a>
+                                <a 
+                                    href="#schemes"
+                                    className={activeTab === 'schemes' ? 'active' : ''}
+                                    onClick={() => setActiveTab('schemes')}
+                                >
+                                    योजना
+                                </a>
+                                <a 
+                                    href="#apply"
+                                    className={activeTab === 'apply' ? 'active' : ''}
+                                    onClick={() => {
+                                        setActiveTab('apply');
+                                        setShowApplicationForm(true);
+                                    }}
+                                >
+                                    अर्ज करा
+                                </a>
+                                <a 
+                                    href="#contact"
+                                    className={activeTab === 'contact' ? 'active' : ''}
+                                    onClick={() => setActiveTab('contact')}
+                                >
+                                    संपर्क
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section className="hero">
+                        <div className="hero-content">
+                            <h2>शेतकऱ्यांसाठी सरकारी योजना</h2>
+                            <p>भारत सरकारच्या विविध कृषी अनुदान योजनांबद्दल जाणून घ्या आणि ऑनलाइन अर्ज करा</p>
+                            <div className="hero-buttons">
+                                <button 
+                                    className="primary-btn"
+                                    onClick={() => {
+                                        setActiveTab('schemes');
+                                        window.scrollTo(0, 600);
+                                    }}
+                                >
+                                    योजना पहा
+                                </button>
+                                <button 
+                                    className="secondary-btn"
+                                    onClick={() => {
+                                        setActiveTab('apply');
+                                        setShowApplicationForm(true);
+                                    }}
+                                >
+                                    आता अर्ज करा
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Quick Categories */}
+                    <div className="quick-categories">
+                        <div 
+                            className="category-card" 
+                            style={{backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}
+                            onClick={() => setSearchQuery('credit')}
+                        >
+                            <h3>कृषी कर्ज</h3>
+                        </div>
+                        <div 
+                            className="category-card" 
+                            style={{backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}
+                            onClick={() => setSearchQuery('insurance')}
+                        >
+                            <h3>पीक विमा</h3>
+                        </div>
+                        <div 
+                            className="category-card" 
+                            style={{backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}
+                            onClick={() => setSearchQuery('irrigation')}
+                        >
+                            <h3>सिंचन</h3>
+                        </div>
+                        <div 
+                            className="category-card" 
+                            style={{backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}
+                            onClick={() => setSearchQuery('equipment')}
+                        >
+                            <h3>यंत्रीकरण</h3>
+                        </div>
+                    </div>
+
+                    {/* Schemes Section */}
+                    <section className="product-section">
+                        <h2 className="section-title">लोकप्रिय सरकारी योजना</h2>
+                        <div className="product-grid">
+                            {filteredSchemes.map(scheme => (
+                                <div className="product-card" key={scheme.id}>
+                                    <img src={`https://picsum.photos/300/200?random=${scheme.id}`} alt={scheme.title} />
+                                    <h3>{scheme.title}</h3>
+                                    <p>{scheme.description}</p>
+                                    <div className="price">पात्रता: {scheme.eligibility}</div>
+                                    <button 
+                                        className="quick-view"
+                                        onClick={() => openOfficialSite(scheme.link)}
+                                    >
+                                        अधिकृत संकेतस्थळ
+                                    </button>
+                                    <button 
+                                        className="location-btn"
+                                        onClick={() => {
+                                            setFormData(prev => ({...prev, scheme: scheme.title}));
+                                            setShowApplicationForm(true);
+                                        }}
+                                    >
+                                        <i className="fas fa-file-alt"></i> अर्ज करा
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Application Modal */}
+                    {showApplicationForm && (
+                        <div className="modal show">
+                            <div className="modal-content">
+                                <button className="close-btn" onClick={() => setShowApplicationForm(false)}>
+                                    &times;
+                                </button>
+                                <div className="modal-body">
+                                    {submitted ? (
+                                        <div className="success-message">
+                                            <h3>अर्ज यशस्वीरित्या सबमिट केला गेला आहे!</h3>
+                                            <p>तुमच्या अर्जाची प्रक्रिया सुरू केली गेली आहे. तुम्हाला एक पुष्टीकरण संदेश प्राप्त होईल.</p>
+                                            <div className="loading-spinner"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <h2>{formData.scheme || 'सामान्य अनुदान'} अर्ज</h2>
+                                            <form onSubmit={handleSubmit} className="booking-form">
+                                                <div className="form-group">
+                                                    <label htmlFor="name">पूर्ण नाव</label>
+                                                    <input 
+                                                        type="text" 
+                                                        id="name" 
+                                                        name="name" 
+                                                        value={formData.name}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="aadhaar">आधार क्रमांक</label>
+                                                    <input 
+                                                        type="text" 
+                                                        id="aadhaar" 
+                                                        name="aadhaar" 
+                                                        value={formData.aadhaar}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="mobile">मोबाइल नंबर</label>
+                                                    <input 
+                                                        type="tel" 
+                                                        id="mobile" 
+                                                        name="mobile" 
+                                                        value={formData.mobile}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="district">जिल्हा</label>
+                                                    <select 
+                                                        id="district" 
+                                                        name="district" 
+                                                        value={formData.district}
+                                                        onChange={handleInputChange}
+                                                        required
+                                                    >
+                                                        <option value="">-- निवडा --</option>
+                                                        <option value="Pune">पुणे</option>
+                                                        <option value="Nashik">नाशिक</option>
+                                                        <option value="Nagpur">नागपूर</option>
+                                                        <option value="Kolhapur">कोल्हापूर</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="scheme">योजना</label>
+                                                    <input 
+                                                        type="text" 
+                                                        id="scheme" 
+                                                        name="scheme" 
+                                                        value={formData.scheme}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="landRecords">जमीन नोंदणी तपशील (७/१२ उतारा क्रमांक)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        id="landRecords" 
+                                                        name="landRecords" 
+                                                        value={formData.landRecords}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="bankDetails">बँक खाते तपशील (IFSC आणि खाते क्रमांक)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        id="bankDetails" 
+                                                        name="bankDetails" 
+                                                        value={formData.bankDetails}
+                                                        onChange={handleInputChange}
+                                                        required 
+                                                    />
+                                                </div>
+                                                <div className="modal-buttons">
+                                                    <button type="submit" className="primary-btn">
+                                                        अर्ज सबमिट करा
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        className="secondary-btn"
+                                                        onClick={() => setShowApplicationForm(false)}
+                                                    >
+                                                        रद्द करा
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer>
+                        <div className="footer-container">
+                            <div className="footer-section">
+                                <h3>आमच्याशी संपर्क साधा</h3>
+                                <p><i className="fas fa-phone"></i> किसान हेल्पलाइन: 1800-180-1551</p>
+                                <p><i className="fas fa-envelope"></i> ईमेल: kisanportal@gov.in</p>
+                                <p><i className="fas fa-map-marker-alt"></i> कृषी मंत्रालय, नवी दिल्ली</p>
+                            </div>
+                            <div className="footer-section">
+                                <h3>द्रुत लिंक</h3>
+                                <a href="https://agricoop.nic.in" target="_blank" rel="noopener noreferrer">
+                                    <i className="fas fa-external-link-alt"></i> कृषी मंत्रालय
+                                </a>
+                                <a href="https://pmkisan.gov.in" target="_blank" rel="noopener noreferrer">
+                                    <i className="fas fa-external-link-alt"></i> पीएम-किसान
+                                </a>
+                                <a href="https://soilhealth.dac.gov.in" target="_blank" rel="noopener noreferrer">
+                                    <i className="fas fa-external-link-alt"></i> मृदा आरोग्य कार्ड
+                                </a>
+                            </div>
+                            <div className="footer-section">
+                                <h3>महत्वाची दस्तऐवज</h3>
+                                <a href="#"><i className="fas fa-file-pdf"></i> योजना मार्गदर्शक तत्त्वे</a>
+                                <a href="#"><i className="fas fa-file-pdf"></i> अर्ज प्रक्रिया</a>
+                                <a href="#"><i className="fas fa-file-pdf"></i> तक्रार निवारण</a>
+                            </div>
+                        </div>
+                        <div className="footer-bottom">
+                            <p>© 2023 शेतकरी अनुदान पोर्टल, भारत सरकार. सर्व हक्क राखीव.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<AgriSubsidyPortal />, document.getElementById('root'));
+    </script>
+</body>
+</html>
