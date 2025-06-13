@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-          /* Base Styles */
+        /* Base Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -738,6 +738,7 @@
                 height: 200px;
             }
         }
+
         .loading-spinner {
             border: 3px solid #e0e0e0;
             border-top: 3px solid #388e3c;
@@ -749,12 +750,17 @@
             vertical-align: middle;
             margin-right: 7px;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg);}
-            100% { transform: rotate(360deg);}
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .primary-btn:disabled {
             background: #bdbdbd;
             cursor: not-allowed;
@@ -1056,10 +1062,9 @@
             };
 
             const showLocation = (coordinates) => {
-                // Show the map modal
                 document.getElementById('mapModal').classList.add('show');
 
-                // Initialize the map if not already initialized
+
                 if (!mapInitialized) {
                     const map = L.map('farmland-map').setView([20.5937, 78.9629], 5);
 
@@ -1067,7 +1072,7 @@
                         attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
                     }).addTo(map);
 
-                    // Add geocoder control
+
                     L.Control.geocoder({
                         defaultMarkGeocode: false,
                         position: 'topleft',
@@ -1076,7 +1081,7 @@
                         errorMessage: 'Location not found.'
                     }).addTo(map);
 
-                    // Handle locate me button
+
                     document.getElementById('locate-me').addEventListener('click', function () {
                         if (!navigator.geolocation) {
                             alert("Geolocation is not supported by your browser");
@@ -1103,7 +1108,7 @@
                         });
                     });
 
-                    // Handle add farm button
+
                     document.getElementById('add-farm').addEventListener('click', function () {
                         alert("Farmland addition feature will be implemented soon!");
                     });
@@ -1112,15 +1117,14 @@
                     setMapInitialized(true);
                 }
 
-                // Center the map on the coordinates and add a marker
+
                 window.farmlandMap.setView(coordinates, 13);
 
-                // Clear existing markers
+
                 if (window.farmlandMarker) {
                     window.farmlandMap.removeLayer(window.farmlandMarker);
                 }
 
-                // Add new marker
                 window.farmlandMarker = L.marker(coordinates).addTo(window.farmlandMap)
                     .bindPopup(`<b>${modalContent.title}</b><br>${modalContent.location}<br>Size: ${modalContent.size || 'N/A'}<br>Price: ${modalContent.price}`)
                     .openPopup();
@@ -1130,7 +1134,7 @@
                 alert("Weather forecast feature will be implemented soon!");
             };
 
-            // Close map modal when close button is clicked
+        
             useEffect(() => {
                 const closeMapModal = document.getElementById('closeMapModal');
                 if (closeMapModal) {
@@ -1183,6 +1187,8 @@
                                 <a href="#machinery" onClick={() => handleNavLinkClick("machinery")}>शेती यंत्रे</a>
                                 <a href="#products" onClick={() => handleNavLinkClick("products")}>उत्पादने</a>
                                 <a href="#about" onClick={() => handleNavLinkClick("about")}>आमच्याबद्दल</a>
+                             <a href="subsides.html">सरकारी अनुदान</a>
+
                                 <button
                                     className="weather-btn"
                                     onClick={() => window.location.href = 'WeatherForecast.html'}
@@ -1573,4 +1579,5 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 </body>
+
 </html>
