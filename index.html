@@ -23,7 +23,7 @@
 
         /* Navigation */
         .navbar {
-            background-color: #4CAF50;
+            background-color: #4CAF50; 
             color: white;
             padding: 15px 0;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -765,6 +765,213 @@
             background: #bdbdbd;
             cursor: not-allowed;
         }
+
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 350px;
+            max-width: 90%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .chatbot-toggle {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .chatbot-toggle:hover {
+            background-color: #388E3C;
+            transform: scale(1.1);
+        }
+
+        .chatbot-window {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            height: 500px;
+            max-height: 80vh;
+        }
+
+        .chatbot-window.open {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background-color: #e5e5ea;
+            color: #000;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background-color: #4CAF50;
+            color: white;
+            border-bottom-right-radius: 5px;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: white;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chatbot-input button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-input button:hover {
+            background-color: #388E3C;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quick-reply {
+            background-color: #e5e5ea;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .quick-reply:hover {
+            background-color: #d1d1d6;
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 10px 15px;
+            background-color: #e5e5ea;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #888;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .chatbot-container {
+                width: 300px;
+                right: 10px;
+                bottom: 10px;
+            }
+            
+            .chatbot-window {
+                height: 400px;
+            }
+        }
     </style>
 </head>
 
@@ -781,6 +988,26 @@
             </div>
             <div id="farmland-map"></div>
         </div>
+    </div>
+
+    <!-- Chatbot Container -->
+    <div class="chatbot-container">
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <h3>AgriLease सहाय्यक</h3>
+                <button class="chatbot-close" id="chatbotClose">&times;</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <!-- Messages will be inserted here by JavaScript -->
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="तुमचा संदेश टाइप करा..." />
+                <button id="chatbotSend"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button class="chatbot-toggle" id="chatbotToggle">
+            <i class="fas fa-robot"></i>
+        </button>
     </div>
 
     <script type="text/babel">
@@ -1064,14 +1291,12 @@
             const showLocation = (coordinates) => {
                 document.getElementById('mapModal').classList.add('show');
 
-
                 if (!mapInitialized) {
                     const map = L.map('farmland-map').setView([20.5937, 78.9629], 5);
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
                     }).addTo(map);
-
 
                     L.Control.geocoder({
                         defaultMarkGeocode: false,
@@ -1080,7 +1305,6 @@
                         placeholder: 'Search for farmland...',
                         errorMessage: 'Location not found.'
                     }).addTo(map);
-
 
                     document.getElementById('locate-me').addEventListener('click', function () {
                         if (!navigator.geolocation) {
@@ -1108,7 +1332,6 @@
                         });
                     });
 
-
                     document.getElementById('add-farm').addEventListener('click', function () {
                         alert("Farmland addition feature will be implemented soon!");
                     });
@@ -1117,9 +1340,7 @@
                     setMapInitialized(true);
                 }
 
-
                 window.farmlandMap.setView(coordinates, 13);
-
 
                 if (window.farmlandMarker) {
                     window.farmlandMap.removeLayer(window.farmlandMarker);
@@ -1134,25 +1355,175 @@
                 alert("Weather forecast feature will be implemented soon!");
             };
 
-        
+            // Initialize chatbot after component mounts
             useEffect(() => {
-                const closeMapModal = document.getElementById('closeMapModal');
-                if (closeMapModal) {
-                    closeMapModal.addEventListener('click', () => {
-                        document.getElementById('mapModal').classList.remove('show');
-                    });
+                // Chatbot functionality
+                const chatbotToggle = document.getElementById('chatbotToggle');
+                const chatbotWindow = document.getElementById('chatbotWindow');
+                const chatbotClose = document.getElementById('chatbotClose');
+                const chatbotMessages = document.getElementById('chatbotMessages');
+                const chatbotInput = document.getElementById('chatbotInput');
+                const chatbotSend = document.getElementById('chatbotSend');
+
+                // Toggle chatbot window
+                chatbotToggle.addEventListener('click', () => {
+                    chatbotWindow.classList.toggle('open');
+                });
+
+                chatbotClose.addEventListener('click', () => {
+                    chatbotWindow.classList.remove('open');
+                });
+
+                // Add welcome message
+                const welcomeMessage = `
+                    <div class="message bot-message">
+                        <div>नमस्कार! मी AgriLease सहाय्यक आहे. मी तुम्हाला कशी मदत करू शकतो?</div>
+                        <div class="quick-replies">
+                            <button class="quick-reply" data-message="जमीन भाड्याने कशी द्यावी?">जमीन भाड्याने कशी द्यावी?</button>
+                            <button class="quick-reply" data-message="यंत्रे भाड्याने कशी घ्यावी?">यंत्रे भाड्याने कशी घ्यावी?</button>
+                            <button class="quick-reply" data-message="कॉन्टॅक्ट नंबर">कॉन्टॅक्ट नंबर</button>
+                        </div>
+                    </div>
+                `;
+                chatbotMessages.innerHTML = welcomeMessage;
+
+                // Quick reply functionality
+                chatbotMessages.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('quick-reply')) {
+                        const message = e.target.getAttribute('data-message');
+                        addUserMessage(message);
+                        processUserMessage(message);
+                    }
+                });
+
+                // Send message on button click
+                chatbotSend.addEventListener('click', () => {
+                    const message = chatbotInput.value.trim();
+                    if (message) {
+                        addUserMessage(message);
+                        processUserMessage(message);
+                        chatbotInput.value = '';
+                    }
+                });
+
+                // Send message on Enter key
+                chatbotInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const message = chatbotInput.value.trim();
+                        if (message) {
+                            addUserMessage(message);
+                            processUserMessage(message);
+                            chatbotInput.value = '';
+                        }
+                    }
+                });
+
+                // Add user message to chat
+                function addUserMessage(message) {
+                    const messageElement = document.createElement('div');
+                    messageElement.className = 'message user-message';
+                    messageElement.innerHTML = `<div>${message}</div>`;
+                    chatbotMessages.appendChild(messageElement);
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
                 }
 
-                return () => {
-                    if (closeMapModal) {
-                        closeMapModal.removeEventListener('click', () => {
-                            document.getElementById('mapModal').classList.remove('show');
-                        });
+                // Add bot message to chat
+                function addBotMessage(message, quickReplies = []) {
+                    // Show typing indicator
+                    const typingIndicator = document.createElement('div');
+                    typingIndicator.className = 'typing-indicator';
+                    typingIndicator.innerHTML = `
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    `;
+                    chatbotMessages.appendChild(typingIndicator);
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+                    // Remove typing indicator after delay and show message
+                    setTimeout(() => {
+                        chatbotMessages.removeChild(typingIndicator);
+                        
+                        const messageElement = document.createElement('div');
+                        messageElement.className = 'message bot-message';
+                        
+                        let messageHTML = `<div>${message}</div>`;
+                        
+                        if (quickReplies.length > 0) {
+                            messageHTML += `<div class="quick-replies">`;
+                            quickReplies.forEach(reply => {
+                                messageHTML += `<button class="quick-reply" data-message="${reply}">${reply}</button>`;
+                            });
+                            messageHTML += `</div>`;
+                        }
+                        
+                        messageElement.innerHTML = messageHTML;
+                        chatbotMessages.appendChild(messageElement);
+                        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                    }, 1000);
+                }
+
+                // Process user message and generate response
+                function processUserMessage(message) {
+                    message = message.toLowerCase();
+                    
+                    // Simple response logic - in a real app, you would connect to a chatbot API
+                    if (message.includes('नमस्कार') || message.includes('हॅलो') || message.includes('hi')) {
+                        addBotMessage('नमस्कार! AgriLease मध्ये तुमचे स्वागत आहे. तुम्हाला कशी मदत हवी?', [
+                            'जमीन भाड्याने कशी द्यावी?',
+                            'यंत्रे भाड्याने कशी घ्यावी?',
+                            'कॉन्टॅक्ट नंबर'
+                        ]);
                     }
-                };
+                    else if (message.includes('जमीन') || message.includes('भाड्याने द्या') || message.includes('land')) {
+                        addBotMessage('तुम्ही तुमची जमीन AgriLease वर भाड्याने देऊ शकता. यासाठी:<br>1. "तुमची जमीन सूचीबद्ध करा" बटणावर क्लिक करा<br>2. जमिनीची माहिती भरा<br>3. आम्ही तुमच्याशी संपर्क साधू', [
+                            'जमीन भाड्याचे दर',
+                            'जमीन सूचीबद्ध करण्यासाठी कागदपत्रे'
+                        ]);
+                    }
+                    else if (message.includes('यंत्र') || message.includes('machine') || message.includes('ट्रॅक्टर')) {
+                        addBotMessage('तुम्ही आमच्या प्लॅटफॉर्मवरून यंत्रे भाड्याने घेऊ शकता:<br>1. "यंत्रे" सेक्शनवर जा<br>2. इच्छित यंत्र निवडा<br>3. भाड्याचा कालावधी निवडा<br>4. बुकिंग पूर्ण करा', [
+                            'यंत्रांची यादी',
+                            'भाड्याचे दर'
+                        ]);
+                    }
+                    else if (message.includes('संपर्क') || message.includes('contact') || message.includes('नंबर')) {
+                        addBotMessage('आमच्या संपर्क माहिती:<br><br><i class="fas fa-phone"></i> +91 9876543210<br><i class="fas fa-envelope"></i> support@agrilease.com<br><i class="fas fa-map-marker-alt"></i> VIT, पुणे, भारत', [
+                            'अधिक मदत',
+                            'तक्रार नोंदवा'
+                        ]);
+                    }
+                    else if (message.includes('धन्यवाद') || message.includes('thank')) {
+                        addBotMessage('तुमचे स्वागत आहे! तुम्हाला आणखी काही मदत हवी आहे का?', [
+                            'जमीन भाड्याने द्या',
+                            'यंत्रे भाड्याने घ्या',
+                            'नाही धन्यवाद'
+                        ]);
+                    }
+                    else {
+                        addBotMessage('मला क्षमस्व, मला तुमचा संदेश समजला नाही. कृपया पुढील पर्यायांपैकी एक निवडा:', [
+                            'जमीन भाड्याने कशी द्यावी?',
+                            'यंत्रे भाड्याने कशी घ्यावी?',
+                            'कॉन्टॅक्ट नंबर'
+                        ]);
+                    }
+                }
+
+                // Close map modal when clicking outside
+                document.getElementById('mapModal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('mapModal')) {
+                        document.getElementById('mapModal').classList.remove('show');
+                    }
+                });
+
+                // Close chatbot when clicking outside (if needed)
+                document.addEventListener('click', (e) => {
+                    if (!chatbotWindow.contains(e.target) && e.target !== chatbotToggle) {
+                        chatbotWindow.classList.remove('open');
+                    }
+                });
             }, []);
 
-            // Filter products based on selected filters
             const filteredLands = Object.values(products).filter(
                 product => product.type === 'land' &&
                     (landSizeFilter === 'all' || product.size === landSizeFilter)
@@ -1187,7 +1558,7 @@
                                 <a href="#machinery" onClick={() => handleNavLinkClick("machinery")}>शेती यंत्रे</a>
                                 <a href="#products" onClick={() => handleNavLinkClick("products")}>उत्पादने</a>
                                 <a href="#about" onClick={() => handleNavLinkClick("about")}>आमच्याबद्दल</a>
-                             <a href="subsides.html">सरकारी अनुदान</a>
+                                <a href="subsides.html">सरकारी अनुदान</a>
 
                                 <button
                                     className="weather-btn"
@@ -1575,7 +1946,6 @@
         root.render(<AgriLeaseApp />);
     </script>
 
-    <!-- Load Leaflet JS after React renders the map modal -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 </body>
